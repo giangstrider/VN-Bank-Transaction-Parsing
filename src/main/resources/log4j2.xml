@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+
+        <Console name="Console">
+            <PatternLayout pattern="%highlight{[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} |%M|} - %msg%n"/>
+        </Console>
+
+        <RollingFile name="RollingFile" fileName="logs/rollingPresentFile.log"
+                     filePattern="logs/$${date:dd-MM-yyyy}-archive/%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%highlight{[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} |%M|} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="512 MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <RollingFile name="RollingInfoFile" fileName="logs/info/rollingInfoPresentFile.log"
+                     filePattern="logs/info/$${date:dd-MM-yyyy}-archive/%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%highlight{[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} |%M|} - %msg%n</pattern>
+            </PatternLayout>
+            <Filters>
+                <!-- Then accept info, warn, error, fatal and deny debug/trace -->
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="512 MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <RollingFile name="RollingErrorFile" fileName="logs/error/rollingErrorPresentFile.log"
+                     filePattern="logs/error/$${date:dd-MM-yyyy}-archive/%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%highlight{[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} |%M|} - %msg%n</pattern>
+            </PatternLayout>
+            <Filters>
+                <!-- Then accept info, warn, error, fatal and deny debug/trace -->
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="512 MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <RollingFile name="RollingDebugFile" fileName="logs/debug/rollingDebugPresentFile.log"
+                     filePattern="logs/debug/$${date:dd-MM-yyyy}-archive/%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%highlight{[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} |%M|} - %msg%n</pattern>
+            </PatternLayout>
+            <Filters>
+                <!-- Then accept info, warn, error, fatal and deny debug/trace -->
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="512 MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+    </Appenders>
+    <Loggers>
+
+        <Logger name="vn.com.momo" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+            <!--<AppenderRef ref="RollingInfoFile"/>-->
+            <!--<AppenderRef ref="RollingErrorFile"/>-->
+            <!--<AppenderRef ref="RollingDebugFile"/>-->
+        </Logger>
+
+        <Logger name="com.blogspot.navcs" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="fatal">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+    </Loggers>
+</Configuration>

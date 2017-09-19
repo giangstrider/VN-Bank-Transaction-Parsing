@@ -1,0 +1,54 @@
+{
+  "Eximbank": {
+    "Date": {"name": "NGÀY GIỜ GIAO DỊCH", "position": 2, "pattern": "DD/MM/YYYY HH:MM:SS", "split": ""},
+    "MomoId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "", "split": "-"},
+    "RefId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "", "split": "-"},
+    "Amount": [
+      {"name": "PHÁT SINH CÓ", "position": 4, "pattern": "", "split": ""},
+      {"name": "PHÁT SINH NỢ", "position": 3, "pattern": "", "split": ""}
+    ],
+    "Type": {}
+  },
+  "TPbank": {
+    "Date": {"name": "Thời gian\\n(Date)", "position": 0, "pattern": "DD/MM/YYYY", "split": ""},
+    "MomoId": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "", "split": "-"},
+    "RefId": {"name": "Mã giao dịch\\n(Transaction code)", "position": 7, "pattern": "", "split": ""},
+    "Amount": [
+      {"name": "Ghi có\\n(Credit)", "position": 3, "pattern": "", "split": ""},
+      {"name": "Ghi nợ\\n(Debit)", "position": 2, "pattern": "", "split": ""}
+    ],
+    "Type": {}
+  },
+  "Ocbbank": {
+    "Date": {"name": "Ngày", "position": 0, "pattern": "DD/MM/YYYY", "split": ""},
+    "MomoId": {"MISSING": ""},
+    "RefId": {"name": "Số GD", "position": 1, "pattern": "", "split": ""},
+    "Amount": [
+      {"name": "Ps tăng (Có)", "position": 3, "pattern": "", "split": ""},
+      {"name": "Ps giảm (Nợ)", "position": 2, "pattern": "", "split": ""}
+    ],
+    "Type": {"Nội dung giao dịch": ""}
+  },
+  "BIDVbank": {
+    "Date": {"name": "Ngày giao dịch", "position": 1, "pattern": "DD/MM/YYYY", "split": ""},
+    "MomoId": {"name": "Nội dung", "position": 4, "pattern": "", "split": " "},
+    "RefId": {"name": "Nội dung", "position": 4, "pattern": "", "split": [" ", "_"]},
+    "Amount": [
+      {"name": "PS Có", "position": 3, "pattern": "", "split": ""},
+      {"name": "PS Nợ", "position": 2, "pattern": "", "split": ""}
+    ],
+    "Type": {}
+  },
+  "VCBbank": {
+    "Date": {"name": "Ngày giao dịch", "position": 0, "pattern": "DD/MM/YYYY", "split": ""},
+    "MomoId": {"name": "Mô tả", "position": 4, "pattern": "", "split": "."},
+    "RefId": {"name": "Mô tả", "position": 4, "pattern": "", "split": "."},
+    "Amount": [
+      {"name": "Số tiền ghi có", "position": 3, "pattern": "", "split": ""},
+      {"name": "Số tiền ghi nợ", "position": 2, "pattern": "", "split": ""}
+    ],
+    "Type": {}
+  }
+}
+
+
