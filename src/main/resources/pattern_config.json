@@ -11,7 +11,7 @@
   },
   "TPbank": {
     "Date": {"name": "Thời gian\\n(Date)", "position": 0, "pattern": "DD/MM/YYYY", "split": ""},
-    "MomoId": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "", "split": "-"},
+    "MomoId": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "\\d{10,11}$", "split": "-"},
     "RefId": {"name": "Mã giao dịch\\n(Transaction code)", "position": 7, "pattern": "", "split": ""},
     "Amount": [
       {"name": "Ghi có\\n(Credit)", "position": 3, "pattern": "", "split": ""},
@@ -31,7 +31,7 @@
   },
   "BIDVbank": {
     "Date": {"name": "Ngày giao dịch", "position": 1, "pattern": "DD/MM/YYYY", "split": ""},
-    "MomoId": {"name": "Nội dung", "position": 4, "pattern": "", "split": " "},
+    "MomoId": {"name": "Nội dung", "position": 4, "pattern": "\\d{10,11}$", "split": ""},
     "RefId": {"name": "Nội dung", "position": 4, "pattern": "", "split": [" ", "_"]},
     "Amount": [
       {"name": "PS Có", "position": 3, "pattern": "", "split": ""},

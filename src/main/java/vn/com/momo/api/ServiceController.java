@@ -17,7 +17,7 @@ public class ServiceController {
         path(reportUrl, () -> {
             before("/*", (q, a) -> log.info("Received api call"));
             get("/bank", (request, response) -> {
-                Eximbank vcb = new Eximbank("/Users/giangtrinh/Downloads/doisoat/TPB.xls");
+                Eximbank vcb = new Eximbank("/home/strider/Downloads/TPB.xls");
 
                 return "OK";
             });
