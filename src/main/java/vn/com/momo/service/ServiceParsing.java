@@ -1,14 +1,18 @@
-package vn.com.momo.bank;
-import com.google.gson.JsonElement;
+package vn.com.momo.service;
 import com.google.gson.JsonObject;
 import lombok.extern.log4j.Log4j2;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import vn.com.momo.app.AppUtils;
 import vn.com.momo.entity.Transaction;
 import vn.com.momo.gson.JsonParserInstance;
+import vn.com.momo.hikari.DataBaseCP;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +33,7 @@ public class ServiceParsing {
     private Double creditAmount;
     private String typeTransaction;
 
-    public ServiceParsing(String fileName) {
+    public ServiceParsing(String fileName, String serviceCode) {
 
         try {
             JsonObject configJson = JsonParserInstance.getInstance().parse(
@@ -38,7 +42,7 @@ public class ServiceParsing {
                     )
             ).getAsJsonObject();
 
-            JsonObject serviceConfig = configJson.getAsJsonObject("VCBbank");
+            JsonObject serviceConfig = configJson.getAsJsonObject(serviceCode);
             //VCB handle IBVCB TOPUP, pattern description differ with Cashin-Cashout
 
             FileInputStream excelFile = new FileInputStream(new File(fileName));
@@ -70,29 +74,39 @@ public class ServiceParsing {
                 Integer typePosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("Type"), "position");
 
                 try {
+                    Transaction transaction = new Transaction();
+
                     //Check regex for date and momoId
                     date = getStringValueByPattern(datePattern, positionDate, currentRow);
                     momoId = getStringValueByPattern(momoPattern, positionMomo, currentRow).replaceAll("[^0-9]", "");
                     transactionId = getStringValueByPattern(transactionPattern, positionTransaction, currentRow);
 
-                    log.info("DAte: " + date);
+                    log.info("Date: " + date);
                     log.info("momoId: " + momoId);
-                    log.info("transaxtionId: " + transactionId);
+                    log.info("transactionId: " + transactionId);
+
+                    transaction.setDate(date);
+                    transaction.setMomoId(Integer.parseInt(momoId));
+                    transaction.setTransactionId(transactionId);
+
                     if(!date.equals("") && !momoId.equals("")){
                         debitAmount = getDoubleValueByPattern(debitAmountPattern, debitAmountPosition, currentRow);
                         creditAmount = getDoubleValueByPattern(creditAmountPattern, creditAmountPosition, currentRow);
+                        transaction.setDebitAmount(debitAmount);
+                        transaction.setCreditAmount(creditAmount);
+
                         String typeMatcher = getStringValueByPattern(typePattern, typePosition, currentRow);
-                        log.info("debit: " + debitAmount);
-                        log.info("credit: " + creditAmount);
+//                        log.info("debit: " + debitAmount);
+//                        log.info("credit: " + creditAmount);
 
                         if(!typeMatcher.equals("")){
-                            String typeTransaction = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type").getAsJsonObject("matcher"), typeMatcher);
-                            log.info("typeTransaction: " + typeTransaction);
+                            typeTransaction = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type").getAsJsonObject("matcher"), typeMatcher);
+                            transaction.setType(typeTransaction);
+                            //log.info("typeTransaction: " + typeTransaction);
                         }
                     }
 
-
-
+                    saveServiceParsed(transaction);
                 }catch(IllegalStateException e){
                     log.info("IllegalStateException - Not a correct row!");
                     continue;
@@ -117,6 +131,25 @@ public class ServiceParsing {
             e.printStackTrace();
         }
 
+    }
+
+    private void saveServiceParsed(Transaction transaction) throws Exception {
+        String sql = "INSERT INTO TRANS_PARTNERS(PARTNER_ID,REF_TID,TID,TRANS_DATE,CREDIT_AMOUNT,DEBIT_AMOUNT,TRANS_TYPE) " +
+                "VALUES('PARTNER_ID', '" + transaction.getTransactionId() + "', 1111, to_timestamp('" + transaction.getDate() + "', 'dd/MM/yyyy'), " +
+                "" + transaction.getCreditAmount() + ", " + transaction.getDebitAmount() + ", '" + transaction.getType() + "')";
+        log.info(sql);
+        DataBaseCP.getInstance().insert(sql);
+
+    }
+
+    protected List<Object> addFields(Transaction transaction) {
+        List<Object> valuesInsertQuerySql = new ArrayList<>();
+        valuesInsertQuerySql.add("PartnerId");
+        valuesInsertQuerySql.add("RefTID");
+        valuesInsertQuerySql.add("TDU");
+        valuesInsertQuerySql.add(transaction.getDate());
+
+        return valuesInsertQuerySql;
     }
 
     private String getStringValueByPattern(String pattern, Integer position, Row currentRow){
@@ -144,5 +177,16 @@ public class ServiceParsing {
         }
 
         return value;
+    }
+
+    private Date getDateValueByPattern(String pattern, Integer position, Row currentRow){
+        String dateString = currentRow.getCell(position).getStringCellValue();
+        Date date = null;
+        try {
+            date = new SimpleDateFormat(pattern).parse(dateString);
+        } catch (ParseException e) {
+            log.info("Parse date error");
+        }
+        return date;
     }
 }

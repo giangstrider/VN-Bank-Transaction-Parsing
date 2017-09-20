@@ -1,0 +1,10 @@
+{
+  "service": [
+    {"pattern": "Exim", "value": "exim.bank"},
+    {"pattern": "TPB", "value": "tp.bank"},
+    {"pattern": "OCB", "value": "ocb.bank"},
+    {"pattern": "BIDV", "value": "bidv.bank"},
+    {"pattern": "vcb", "value": "vcb.bank"},
+    {"pattern": "Vietcombank", "value": "vcb.bank"}
+  ]
+}
