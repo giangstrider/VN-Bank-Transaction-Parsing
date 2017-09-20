@@ -29,7 +29,6 @@ import java.util.Iterator;
 public class ServiceParsing {
     private String date;
     private String momoId;
-    //private Integer transactionId;
     private String transactionId;
     private Double debitAmount;
     private Double creditAmount;
@@ -43,14 +42,17 @@ public class ServiceParsing {
                             AppConfig.getInstance().getFileConfig().getProperty("patternConfigPath", "/target/resources/pattern_config.json")
                     )
             ).getAsJsonObject();
-
             JsonObject serviceConfig = configJson.getAsJsonObject(serviceCode);
-            //VCB handle IBVCB TOPUP, pattern description differ with Cashin-Cashout
 
             FileInputStream excelFile = new FileInputStream(new File(fileName));
+            String ableTypeParse = AppUtils.getStringFromJsonObject(serviceConfig, "FileType");
+            Workbook workbook = null;
+            if(ableTypeParse.equals("HSSF")){
+                workbook = new HSSFWorkbook(excelFile);
+            }else{
+                workbook = new XSSFWorkbook(excelFile);
+            }
 
-            Workbook workbook = new HSSFWorkbook(excelFile);
-            //Workbook workbook = new HSSFWorkbook(excelFile);
             Sheet datatypeSheet = workbook.getSheetAt(0);
             Iterator<Row> iterator = datatypeSheet.iterator();
 
@@ -76,23 +78,24 @@ public class ServiceParsing {
                 Integer typePosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("Type"), "position");
 
                 try {
-                    Transaction transaction = new Transaction();
-                    transaction.setServiceName(serviceCode);
-
-                    //Check regex for date and momoId
                     date = getStringValueByPattern(datePattern, positionDate, currentRow).replaceAll("\\s.*", "");
-                    momoId = getStringValueByPattern(momoPattern, positionMomo, currentRow).replaceAll("[^0-9]", "");
-                    transactionId = getStringValueByPattern(transactionPattern, positionTransaction, currentRow);
+                    Pattern patternDate = Pattern.compile("^(0[1-9]|[1-2][0-9]|3[0-1])\\/(0[1-9]|1[0-2])\\/[0-9]{4}$");
+                    Matcher matcherDate = patternDate.matcher(date);
+                    if(matcherDate.find()){
+                        Transaction transaction = new Transaction();
+                        transaction.setServiceName(serviceCode);
 
-                    log.info("Date: " + date);
-                    log.info("momoId: " + momoId);
-                    log.info("transactionId: " + transactionId);
+                        momoId = getStringValueByPattern(momoPattern, positionMomo, currentRow).replaceAll("[^0-9]", "");
+                        transactionId = getStringValueByPattern(transactionPattern, positionTransaction, currentRow);
 
-                    transaction.setDate(date);
-                    transaction.setMomoId(Integer.parseInt(momoId));
-                    transaction.setTransactionId(transactionId);
+                        log.info("Date: " + date);
+                        log.info("momoId: " + momoId);
+                        log.info("transactionId: " + transactionId);
 
-                    if(!date.equals("") && !momoId.equals("")){
+                        transaction.setDate(date);
+                        transaction.setMomoId(Integer.parseInt(momoId));
+                        transaction.setTransactionId(transactionId);
+
                         debitAmount = getDoubleValueByPattern(debitAmountPattern, debitAmountPosition, currentRow);
                         creditAmount = getDoubleValueByPattern(creditAmountPattern, creditAmountPosition, currentRow);
                         transaction.setDebitAmount(debitAmount);
@@ -107,9 +110,11 @@ public class ServiceParsing {
                             transaction.setType(typeTransaction);
                             log.info("typeTransaction: " + typeTransaction);
                         }
+
+                        saveServiceParsed(transaction);
                     }
 
-                    saveServiceParsed(transaction);
+
                 }catch(IllegalStateException e){
                     log.info("IllegalStateException - Not a correct row!");
                     continue;
@@ -142,17 +147,6 @@ public class ServiceParsing {
                 "" + transaction.getCreditAmount() + ", " + transaction.getDebitAmount() + ", '" + transaction.getType() + "')";
         log.info(sql);
         DataBaseCP.getInstance().insert(sql);
-
-    }
-
-    protected List<Object> addFields(Transaction transaction) {
-        List<Object> valuesInsertQuerySql = new ArrayList<>();
-        valuesInsertQuerySql.add("PartnerId");
-        valuesInsertQuerySql.add("RefTID");
-        valuesInsertQuerySql.add("TDU");
-        valuesInsertQuerySql.add(transaction.getDate());
-
-        return valuesInsertQuerySql;
     }
 
     private String getStringValueByPattern(String pattern, Integer position, Row currentRow){

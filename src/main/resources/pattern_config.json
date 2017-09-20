@@ -1,5 +1,6 @@
 {
   "exim.bank": {
+    "FileType": "HSSF",
     "Date": {"name": "NGÀY GIỜ GIAO DỊCH", "position": 2, "pattern": "", "split": ""},
     "MomoId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "\\d{10,11}", "split": "-"},
     "RefId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "-\\d{12,15}", "split": "-"},
@@ -8,6 +9,7 @@
     "Type": {"name": "DIỄN GIẢI", "position": 6, "pattern": "Nap|Rut|TopUp", "matcher": {"Nap": "CashIn", "Rut": "CashOut", "TopUp": "TopUp"}, "split": ""}
   },
   "tp.bank": {
+    "FileType": "HSSF",
     "Date": {"name": "Thời gian\\n(Date)", "position": 0, "pattern": "", "split": ""},
     "MomoId": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "\\d{10,11}", "split": "-"},
     "RefId": {"name": "Mã giao dịch\\n(Transaction code)", "position": 7, "pattern": "", "split": ""},
@@ -16,6 +18,7 @@
     "Type": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "NAP|RUT|TopUp", "matcher": {"NAP": "CashIn", "RUT": "CashOut", "TopUp": "TopUp"}, "split": ""}
   },
   "ocb.bank": {
+    "FileType": "HSSF",
     "Date": {"name": "Ngày", "position": 0, "pattern": "", "split": ""},
     "MomoId": {"MISSING": ""},
     "RefId": {"name": "Số GD", "position": 1, "pattern": "", "split": ""},
@@ -24,6 +27,7 @@
     "Type": {"Nội dung giao dịch": ""}
   },
   "bidv.bank": {
+    "FileType": "HSSF",
     "Date": {"name": "Ngày giao dịch", "position": 1, "pattern": "", "split": ""},
     "MomoId": {"name": "Nội dung", "position": 4, "pattern": "\\d{10,11}$", "split": ""},
     "RefId": {"name": "Nội dung", "position": 4, "pattern": "_\\d{8}_", "split": [" ", "_"]},
@@ -32,6 +36,7 @@
     "Type": {"name": "Nội dung", "position": 4, "pattern": "Nap|Rut|TopUp", "matcher": {"Nap": "CashIn", "Rut": "CashOut", "TopUp": "TopUp"}, "split": ""}
   },
   "vcb.bank": {
+    "FileType": "XSSF",
     "Date": {"name": "Ngày giao dịch", "position": 0, "pattern": "", "split": ""},
     "MomoId": {"name": "Mô tả", "position": 4, "pattern": "(\\b\\d{10,11}\\b)", "split": "."},
     "RefId": {"name": "Mô tả", "position": 4, "pattern": "EW\\d{10,15}", "split": "."},
