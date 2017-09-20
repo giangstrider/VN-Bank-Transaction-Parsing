@@ -25,6 +25,8 @@ public class AppConfig {
     Properties topicProducer;
     @Getter
     Properties oracleClient;
+    @Getter
+    Properties fileConfig;
 
     //private Configurations configs;
 
@@ -37,6 +39,7 @@ public class AppConfig {
             producer = new PropertiesReader("producer.properties").getProperties();
             topicProducer = new PropertiesReader("topicproducer.properties").getProperties();
             oracleClient = new PropertiesReader("oraclejdbc.properties").getProperties();
+            fileConfig = new PropertiesReader("fileconfig.properties").getProperties();
         } catch (Exception e) {
             log.error(AppUtils.getFullStackTrace(e));
         }

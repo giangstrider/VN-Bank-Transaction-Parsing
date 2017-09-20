@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.extern.log4j.Log4j2;
+import vn.com.momo.app.AppConfig;
 import vn.com.momo.app.AppUtils;
 import vn.com.momo.gson.JsonParserInstance;
 
@@ -25,22 +26,24 @@ public class ServiceCode {
         try {
             JsonObject configJson = JsonParserInstance.getInstance().parse(
                     new FileReader(
-                            "/Users/giangtrinh/app/report-api/target/resources/service_code.json"
+                            AppConfig.getInstance().getFileConfig().getProperty("serviceCodeConfigPath", "/target/resources/service_code.json")
                     )
             ).getAsJsonObject();
 
             JsonArray serviceCodeConfig = configJson.getAsJsonArray("service");
             Iterator<JsonElement> jsonArrayConfig = serviceCodeConfig.iterator();
             while(jsonArrayConfig.hasNext()){
-                String pattern = AppUtils.getStringFromJsonObject(jsonArrayConfig.next().getAsJsonObject(), "pattern");
-                log.info("Pattern: " + pattern);
-                log.info("Filename: " + fileName);
+                JsonObject objectHold = jsonArrayConfig.next().getAsJsonObject();
+                String pattern = AppUtils.getStringFromJsonObject(objectHold, "pattern");
+                log.info("pattern: " + pattern);
+                log.info("fileName: " + fileName);
 
                 Pattern p = Pattern.compile(pattern);
                 Matcher m = p.matcher(fileName);
 
                 if(m.find()){
-                    serviceCode = AppUtils.getStringFromJsonObject(jsonArrayConfig.next().getAsJsonObject(), "value");
+                    serviceCode = AppUtils.getStringFromJsonObject(objectHold, "value");
+                    log.info("m.group: " + m.group(0));
                     log.info("serviceCode: " + serviceCode);
                     break;
                 }

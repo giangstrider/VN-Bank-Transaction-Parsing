@@ -1,8 +1,10 @@
 package vn.com.momo.service;
 import com.google.gson.JsonObject;
 import lombok.extern.log4j.Log4j2;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import vn.com.momo.app.AppConfig;
 import vn.com.momo.app.AppUtils;
 import vn.com.momo.entity.Transaction;
 import vn.com.momo.gson.JsonParserInstance;
@@ -38,7 +40,7 @@ public class ServiceParsing {
         try {
             JsonObject configJson = JsonParserInstance.getInstance().parse(
                     new FileReader(
-                            "/Users/giangtrinh/app/report-api/target/resources/pattern_config.json"
+                            AppConfig.getInstance().getFileConfig().getProperty("patternConfigPath", "/target/resources/pattern_config.json")
                     )
             ).getAsJsonObject();
 
@@ -96,13 +98,13 @@ public class ServiceParsing {
                         transaction.setCreditAmount(creditAmount);
 
                         String typeMatcher = getStringValueByPattern(typePattern, typePosition, currentRow);
-//                        log.info("debit: " + debitAmount);
-//                        log.info("credit: " + creditAmount);
+                        log.info("debit: " + debitAmount);
+                        log.info("credit: " + creditAmount);
 
                         if(!typeMatcher.equals("")){
                             typeTransaction = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type").getAsJsonObject("matcher"), typeMatcher);
                             transaction.setType(typeTransaction);
-                            //log.info("typeTransaction: " + typeTransaction);
+                            log.info("typeTransaction: " + typeTransaction);
                         }
                     }
 
