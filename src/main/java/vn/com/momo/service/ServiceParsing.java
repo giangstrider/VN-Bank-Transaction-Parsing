@@ -49,7 +49,7 @@ public class ServiceParsing {
 
             FileInputStream excelFile = new FileInputStream(new File(fileName));
 
-            Workbook workbook = new XSSFWorkbook(excelFile);
+            Workbook workbook = new HSSFWorkbook(excelFile);
             //Workbook workbook = new HSSFWorkbook(excelFile);
             Sheet datatypeSheet = workbook.getSheetAt(0);
             Iterator<Row> iterator = datatypeSheet.iterator();
@@ -77,9 +77,10 @@ public class ServiceParsing {
 
                 try {
                     Transaction transaction = new Transaction();
+                    transaction.setServiceName(serviceCode);
 
                     //Check regex for date and momoId
-                    date = getStringValueByPattern(datePattern, positionDate, currentRow);
+                    date = getStringValueByPattern(datePattern, positionDate, currentRow).replaceAll("\\s.*", "");
                     momoId = getStringValueByPattern(momoPattern, positionMomo, currentRow).replaceAll("[^0-9]", "");
                     transactionId = getStringValueByPattern(transactionPattern, positionTransaction, currentRow);
 
@@ -137,7 +138,7 @@ public class ServiceParsing {
 
     private void saveServiceParsed(Transaction transaction) throws Exception {
         String sql = "INSERT INTO TRANS_PARTNERS(PARTNER_ID,REF_TID,TID,TRANS_DATE,CREDIT_AMOUNT,DEBIT_AMOUNT,TRANS_TYPE) " +
-                "VALUES('PARTNER_ID', '" + transaction.getTransactionId() + "', 1111, to_timestamp('" + transaction.getDate() + "', 'dd/MM/yyyy'), " +
+                "VALUES('" + transaction.getServiceName() + "', '" + transaction.getTransactionId() + "', 1111, to_date('" + transaction.getDate() + "', 'dd/MM/yyyy'), " +
                 "" + transaction.getCreditAmount() + ", " + transaction.getDebitAmount() + ", '" + transaction.getType() + "')";
         log.info(sql);
         DataBaseCP.getInstance().insert(sql);
