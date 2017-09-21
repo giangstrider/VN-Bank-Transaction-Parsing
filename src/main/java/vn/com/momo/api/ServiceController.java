@@ -19,9 +19,6 @@ public class ServiceController {
         path(reportUrl, () -> {
             get("/service", (request, response) -> {
                String paramName = request.queryParams("name");
-
-                //ServiceParsing vcb = new ServiceParsing("/Users/giangtrinh/Downloads/doisoat/vcb.xlsx");
-
                 String filePath = AppConfig.getInstance().getFileConfig().getProperty("fileInputPath", "/target/resources/");
                 ServiceCode serviceCode = new ServiceCode(filePath + paramName);
 

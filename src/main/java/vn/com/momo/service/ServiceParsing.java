@@ -56,27 +56,26 @@ public class ServiceParsing {
             Sheet datatypeSheet = workbook.getSheetAt(0);
             Iterator<Row> iterator = datatypeSheet.iterator();
 
+            String datePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Date"), "pattern");
+            Integer positionDate = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("Date"), "position");
+
+            String momoPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("MomoId"), "pattern");
+            Integer positionMomo = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("MomoId"), "position");
+
+            String transactionPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("RefId"), "pattern");
+            Integer positionTransaction = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("RefId"), "position");
+
+            String debitAmountPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("DebitAmount"), "pattern");
+            Integer debitAmountPosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("DebitAmount"), "position");
+
+            String creditAmountPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("CreditAmount"), "pattern");
+            Integer creditAmountPosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("CreditAmount"), "position");
+
+            String typePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type"), "pattern");
+            Integer typePosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("Type"), "position");
+
             while (iterator.hasNext()) {
-
                 Row currentRow = iterator.next();
-                String datePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Date"), "pattern");
-                Integer positionDate = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("Date"), "position");
-
-                String momoPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("MomoId"), "pattern");
-                Integer positionMomo = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("MomoId"), "position");
-
-                String transactionPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("RefId"), "pattern");
-                Integer positionTransaction = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("RefId"), "position");
-
-                String debitAmountPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("DebitAmount"), "pattern");
-                Integer debitAmountPosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("DebitAmount"), "position");
-
-                String creditAmountPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("CreditAmount"), "pattern");
-                Integer creditAmountPosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("CreditAmount"), "position");
-
-                String typePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type"), "pattern");
-                Integer typePosition = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("Type"), "position");
-
                 try {
                     date = getStringValueByPattern(datePattern, positionDate, currentRow).replaceAll("\\s.*", "");
                     Pattern patternDate = Pattern.compile("^(0[1-9]|[1-2][0-9]|3[0-1])\\/(0[1-9]|1[0-2])\\/[0-9]{4}$");
@@ -84,24 +83,26 @@ public class ServiceParsing {
                     if(matcherDate.find()){
                         Transaction transaction = new Transaction();
                         transaction.setServiceName(serviceCode);
+                        transaction.setDate(date);
 
-                        momoId = getStringValueByPattern(momoPattern, positionMomo, currentRow).replaceAll("[^0-9]", "");
+                        if(positionMomo > 0){
+                            momoId = getStringValueByPattern(momoPattern, positionMomo, currentRow).replaceAll("[^0-9]", "");
+                            transaction.setMomoId(momoId);
+                        }
+
                         transactionId = getStringValueByPattern(transactionPattern, positionTransaction, currentRow);
                         if(transactionId.equals("")){
                             log.info(currentRow.getCell(positionTransaction));
                         }
-
-                        transaction.setDate(date);
-                        transaction.setMomoId(Long.parseLong(momoId));
                         transaction.setTransactionId(transactionId);
 
                         debitAmount = getDoubleValueByPattern(debitAmountPattern, debitAmountPosition, currentRow);
-                        creditAmount = getDoubleValueByPattern(creditAmountPattern, creditAmountPosition, currentRow);
                         transaction.setDebitAmount(debitAmount);
+
+                        creditAmount = getDoubleValueByPattern(creditAmountPattern, creditAmountPosition, currentRow);
                         transaction.setCreditAmount(creditAmount);
 
                         String typeMatcher = getStringValueByPattern(typePattern, typePosition, currentRow);
-
                         if(!typeMatcher.equals("")){
                             typeTransaction = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type").getAsJsonObject("matcher"), typeMatcher);
                             transaction.setType(typeTransaction);
@@ -111,7 +112,7 @@ public class ServiceParsing {
 //                                "debit: "+ transaction.getDebitAmount() +", credit: "+ transaction.getCreditAmount() +", type: "+ transaction.getType() +"}}");
                         saveServiceParsed(transaction);
                     }else{
-                        log.info(currentRow.getCell(positionTransaction));
+                        log.info("NOT TRANSACTION: " + currentRow.getCell(positionTransaction));
                     }
 
 
@@ -138,18 +139,19 @@ public class ServiceParsing {
             e.printStackTrace();
         }
 
+        log.info("Done Import");
     }
 
     private void saveServiceParsed(Transaction transaction) throws Exception {
-        String sql = "INSERT INTO TRANS_PARTNERS(PARTNER_ID,REF_TID,TID,TRANS_DATE,CREDIT_AMOUNT,DEBIT_AMOUNT,TRANS_TYPE) " +
-                "VALUES('" + transaction.getServiceName() + "', '" + transaction.getTransactionId() + "', 1111, to_date('" + transaction.getDate() + "', 'dd/MM/yyyy'), " +
+        String sql = "INSERT INTO TRANS_PARTNERS(PARTNER_ID,REF_TID,MOMO_ID,TRANS_DATE,CREDIT_AMOUNT,DEBIT_AMOUNT,TRANS_TYPE) " +
+                "VALUES('" + transaction.getServiceName() + "', '" + transaction.getTransactionId() + "', " + transaction.getMomoId() + ", to_date('" + transaction.getDate() + "', 'dd/MM/yyyy'), " +
                 "" + transaction.getCreditAmount() + ", " + transaction.getDebitAmount() + ", '" + transaction.getType() + "')";
         //log.info(sql);
         DataBaseCP.getInstance().insert(sql);
     }
 
     private String getStringValueByPattern(String pattern, Integer position, Row currentRow){
-        String value = null;
+        String value = "";
         if(!pattern.equals("")){
             Pattern p = Pattern.compile(pattern);
             Matcher m = p.matcher(currentRow.getCell(position).getStringCellValue());
@@ -181,6 +183,7 @@ public class ServiceParsing {
         try {
             date = new SimpleDateFormat(pattern).parse(dateString);
         } catch (ParseException e) {
+            e.printStackTrace();
             log.info("Parse date error");
         }
         return date;
