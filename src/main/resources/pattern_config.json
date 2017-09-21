@@ -29,7 +29,7 @@
   "bidv.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Ngày giao dịch", "position": 1, "pattern": "", "split": ""},
-    "MomoId": {"name": "Nội dung", "position": 4, "pattern": "\\d{10,11}$", "split": ""},
+    "MomoId": {"name": "Nội dung", "position": 4, "pattern": "(\\d+)(?!.*\\d{10,11})", "split": ""},
     "RefId": {"name": "Nội dung", "position": 4, "pattern": "_\\d{8}_", "split": [" ", "_"]},
     "DebitAmount": {"name": "PS Nợ", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "PS Có", "position": 3, "pattern": "", "split": ""},
@@ -39,7 +39,7 @@
     "FileType": "XSSF",
     "Date": {"name": "Ngày giao dịch", "position": 0, "pattern": "", "split": ""},
     "MomoId": {"name": "Mô tả", "position": 4, "pattern": "(\\b\\d{10,11}\\b)", "split": "."},
-    "RefId": {"name": "Mô tả", "position": 4, "pattern": "EW\\d{10,15}", "split": "."},
+    "RefId": {"name": "Mô tả", "position": 4, "pattern": "[0-9]+", "split": "."},
     "DebitAmount": {"name": "Số tiền ghi nợ", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Số tiền ghi có", "position": 3, "pattern": "", "split": ""},
     "Type": {"name": "Mô tả", "position": 4, "pattern": "CashIn|CashOut|IBVCB", "matcher": {"CashIn": "CashIn", "CashOut": "CashOut", "IBVCB": "TopUp"}, "split": ""}

@@ -28,11 +28,11 @@ import java.util.Iterator;
 @Log4j2
 public class ServiceParsing {
     private String date;
-    private String momoId;
-    private String transactionId;
-    private Double debitAmount;
-    private Double creditAmount;
-    private String typeTransaction;
+    private String momoId = null;
+    private String transactionId = null;
+    private Double debitAmount = 0.0;
+    private Double creditAmount = 0.0;
+    private String typeTransaction = null;
 
     public ServiceParsing(String fileName, String serviceCode) {
 
@@ -87,13 +87,12 @@ public class ServiceParsing {
 
                         momoId = getStringValueByPattern(momoPattern, positionMomo, currentRow).replaceAll("[^0-9]", "");
                         transactionId = getStringValueByPattern(transactionPattern, positionTransaction, currentRow);
-
-                        log.info("Date: " + date);
-                        log.info("momoId: " + momoId);
-                        log.info("transactionId: " + transactionId);
+                        if(transactionId.equals("")){
+                            log.info(currentRow.getCell(positionTransaction));
+                        }
 
                         transaction.setDate(date);
-                        transaction.setMomoId(Integer.parseInt(momoId));
+                        transaction.setMomoId(Long.parseLong(momoId));
                         transaction.setTransactionId(transactionId);
 
                         debitAmount = getDoubleValueByPattern(debitAmountPattern, debitAmountPosition, currentRow);
@@ -102,34 +101,34 @@ public class ServiceParsing {
                         transaction.setCreditAmount(creditAmount);
 
                         String typeMatcher = getStringValueByPattern(typePattern, typePosition, currentRow);
-                        log.info("debit: " + debitAmount);
-                        log.info("credit: " + creditAmount);
 
                         if(!typeMatcher.equals("")){
                             typeTransaction = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type").getAsJsonObject("matcher"), typeMatcher);
                             transaction.setType(typeTransaction);
-                            log.info("typeTransaction: " + typeTransaction);
                         }
 
+//                        log.info("{Transaction: {Date: "+ transaction.getDate() +", momoId: "+ transaction.getMomoId() +", transactionId: "+ transaction.getTransactionId() +", " +
+//                                "debit: "+ transaction.getDebitAmount() +", credit: "+ transaction.getCreditAmount() +", type: "+ transaction.getType() +"}}");
                         saveServiceParsed(transaction);
+                    }else{
+                        log.info(currentRow.getCell(positionTransaction));
                     }
 
 
                 }catch(IllegalStateException e){
-                    log.info("IllegalStateException - Not a correct row!");
+                    e.printStackTrace();
+                    log.info(currentRow.getCell(positionTransaction));
                     continue;
                 }catch(NumberFormatException e) {
-                    log.info("NumberFormatException - Not a correct row!");
+                    e.printStackTrace();
+                    log.info(currentRow.getCell(positionTransaction));
                     continue;
                 }
                 catch(NullPointerException e){
-                    log.info("Null pointer");
-                    continue;
+                    e.printStackTrace();
+                    log.info(currentRow.getCell(positionTransaction));
+                    //continue;
                 }
-
-                log.info("=================================");
-
-
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -145,7 +144,7 @@ public class ServiceParsing {
         String sql = "INSERT INTO TRANS_PARTNERS(PARTNER_ID,REF_TID,TID,TRANS_DATE,CREDIT_AMOUNT,DEBIT_AMOUNT,TRANS_TYPE) " +
                 "VALUES('" + transaction.getServiceName() + "', '" + transaction.getTransactionId() + "', 1111, to_date('" + transaction.getDate() + "', 'dd/MM/yyyy'), " +
                 "" + transaction.getCreditAmount() + ", " + transaction.getDebitAmount() + ", '" + transaction.getType() + "')";
-        log.info(sql);
+        //log.info(sql);
         DataBaseCP.getInstance().insert(sql);
     }
 

@@ -17,7 +17,7 @@ public class ServiceController {
     public ServiceController() throws Exception {
         String reportUrl = String.join(AppConstant.FORWARD_SLASH);
         path(reportUrl, () -> {
-            get("/bank", (request, response) -> {
+            get("/service", (request, response) -> {
                String paramName = request.queryParams("name");
 
                 //ServiceParsing vcb = new ServiceParsing("/Users/giangtrinh/Downloads/doisoat/vcb.xlsx");
