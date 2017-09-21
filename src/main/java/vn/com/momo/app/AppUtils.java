@@ -12,10 +12,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-/**
- * Created by anhvunguyen on 24/01/2017.
- */
-
 @Log4j2
 public class AppUtils {
 

@@ -20,11 +20,11 @@
   "ocb.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Ngày", "position": 0, "pattern": "", "split": ""},
-    "MomoId": {"MISSING": ""},
+    "MomoId": {"name": "", "position": -1, "pattern": ""},
     "RefId": {"name": "Số GD", "position": 1, "pattern": "", "split": ""},
     "DebitAmount": {"name": "Ps giảm (Nợ)", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Ps tăng (Có)", "position": 3, "pattern": "", "split": ""},
-    "Type": {"Nội dung giao dịch": ""}
+    "Type": {"name": "Nội dung giao dịch", "position": 5, "pattern": "CASHIN|CASHOUT|TopUp", "matcher": {"CASHIN": "CashIn", "CASHOUT": "CashOut", "TopUp": "TopUp"}}
   },
   "bidv.bank": {
     "FileType": "HSSF",
