@@ -4,9 +4,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.concurrent.*;
 
-/**
- * Created by anhvunguyen on 28/02/2017.
- */
 @Log4j2
 public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
 

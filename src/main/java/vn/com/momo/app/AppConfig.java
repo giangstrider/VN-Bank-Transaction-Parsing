@@ -8,21 +8,11 @@ import vn.com.momo.properties.PropertiesReader;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-
-/**
- * Created by navcs on 2/8/17.
- */
 @Log4j2
 public class AppConfig {
 
     @Getter
     Properties server;
-    @Getter
-    Properties hikariCp;
-    @Getter
-    Properties producer;
-    @Getter
-    Properties topicProducer;
     @Getter
     Properties oracleClient;
     @Getter
@@ -35,9 +25,6 @@ public class AppConfig {
     private AppConfig() {
         try {
             server = getPropertiesPath("server.properties");
-
-            producer = new PropertiesReader("producer.properties").getProperties();
-            topicProducer = new PropertiesReader("topicproducer.properties").getProperties();
             oracleClient = new PropertiesReader("oraclejdbc.properties").getProperties();
             fileConfig = new PropertiesReader("fileconfig.properties").getProperties();
         } catch (Exception e) {

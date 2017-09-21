@@ -6,9 +6,6 @@ import vn.com.momo.constant.AppConstant;
 
 import static spark.Spark.*;
 
-/**
- * Created by navcs on 3/6/17.
- */
 @Log4j2
 public class AppMain {
 
