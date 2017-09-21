@@ -108,8 +108,8 @@ public class ServiceParsing {
                             transaction.setType(typeTransaction);
                         }
 
-//                        log.info("{Transaction: {Date: "+ transaction.getDate() +", momoId: "+ transaction.getMomoId() +", transactionId: "+ transaction.getTransactionId() +", " +
-//                                "debit: "+ transaction.getDebitAmount() +", credit: "+ transaction.getCreditAmount() +", type: "+ transaction.getType() +"}}");
+                        log.info("{Transaction: {Date: "+ transaction.getDate() +", momoId: "+ transaction.getMomoId() +", transactionId: "+ transaction.getTransactionId() +", " +
+                                "debit: "+ transaction.getDebitAmount() +", credit: "+ transaction.getCreditAmount() +", type: "+ transaction.getType() +"}}");
                         saveServiceParsed(transaction);
                     }else{
                         log.info("NOT TRANSACTION: " + currentRow.getCell(positionTransaction));
