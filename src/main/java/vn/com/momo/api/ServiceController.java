@@ -19,10 +19,11 @@ public class ServiceController {
         path(reportUrl, () -> {
             get("/service", (request, response) -> {
                String paramName = request.queryParams("name");
+                String paramId = request.queryParams("id");
                 String filePath = AppConfig.getInstance().getFileConfig().getProperty("fileInputPath", "/target/resources/");
                 ServiceCode serviceCode = new ServiceCode(filePath + paramName);
 
-                ServiceParsing serviceParsing = new ServiceParsing(filePath + paramName, serviceCode.getServiceCode());
+                ServiceParsing serviceParsing = new ServiceParsing(filePath + paramName, serviceCode.getServiceCode(), Integer.parseInt(paramId));
                 return "OK";
             });
         });

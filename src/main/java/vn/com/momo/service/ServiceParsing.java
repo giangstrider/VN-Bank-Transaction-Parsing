@@ -1,6 +1,12 @@
 package vn.com.momo.service;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.extern.log4j.Log4j2;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -34,7 +40,7 @@ public class ServiceParsing {
     private Double creditAmount = 0.0;
     private String typeTransaction = null;
 
-    public ServiceParsing(String fileName, String serviceCode) {
+    public ServiceParsing(String fileName, String serviceCode, int paramId) {
 
         try {
             JsonObject configJson = JsonParserInstance.getInstance().parse(
@@ -132,14 +138,51 @@ public class ServiceParsing {
                 }
             }
         } catch (FileNotFoundException e) {
+            try {
+                sendNotiStatus(paramId, 2);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         } catch (IOException e) {
+            try {
+                sendNotiStatus(paramId, 2);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         } catch (Exception e) {
+            try {
+                sendNotiStatus(paramId, 2);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
 
+        try {
+            sendNotiStatus(paramId, 1);
+        }
+        catch (Exception e) {
+            log.error(e.getMessage());
+        }
         log.info("Done Import");
+
+    }
+
+    private void sendNotiStatus(int id, int status) throws Exception{
+        String url = AppConfig.getInstance().getFileConfig().getProperty("apiDashboardPath", "http://172.16.8.10/accounts/receive_status");
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpPost post = new HttpPost(url);
+        post.addHeader("Content-Type","application/json");
+        vn.com.momo.entity.Message message = new vn.com.momo.entity.Message();
+        message.setId(id);
+        message.setStatus(status);
+        String param = new Gson().toJson(message);
+        post.setEntity(new StringEntity(param));
+        HttpResponse response = client.execute(post);
+        String result = response.toString();
+        log.info("Result: " + result);
     }
 
     private void saveServiceParsed(Transaction transaction) throws Exception {
