@@ -4,45 +4,55 @@
     "Date": {"name": "NGÀY GIỜ GIAO DỊCH", "position": 2, "pattern": "", "split": ""},
     "MomoId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "\\d{10,11}", "split": "-"},
     "RefId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "-\\d{12,15}", "split": "-"},
+    "AdjustmentTid": {"ruleAdjustment": false},
     "DebitAmount": {"name": "PHÁT SINH NỢ", "position": 3, "pattern": "", "split": ""},
     "CreditAmount": {"name": "PHÁT SINH CÓ", "position": 4, "pattern": "", "split": ""},
-    "Type": {"name": "DIỄN GIẢI", "position": 6, "pattern": "Nap|Rut|TopUp", "matcher": {"Nap": "CashIn", "Rut": "CashOut", "TopUp": "TopUp"}, "split": ""}
+    "Type": {"name": "DIỄN GIẢI", "position": 6, "pattern": "tu -|Rut|tu.", "matcher": {"tu -": "bankcashin", "Rut": "bankcashout", "tu.": "adjustment"}, "otherAdjust": false},
+    "MisTIDfield": "RefID"
   },
   "tp.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Thời gian\\n(Date)", "position": 0, "pattern": "", "split": ""},
     "MomoId": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "\\d{10,11}", "split": "-"},
     "RefId": {"name": "Mã giao dịch\\n(Transaction code)", "position": 7, "pattern": "", "split": ""},
+    "AdjustmentTid": {"ruleAdjustment": false},
     "DebitAmount": {"name": "Ghi nợ\\n(Debit)", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Ghi có\\n(Credit)", "position": 3, "pattern": "", "split": ""},
-    "Type": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "NAP|RUT|TopUp", "matcher": {"NAP": "CashIn", "RUT": "CashOut", "TopUp": "TopUp"}, "split": ""}
+    "Type": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "NAP TIEN VI MOMO|RUT|NAP TIEN VI DIEN TU", "matcher": {"NAP TIEN VI MOMO": "bankcashin", "RUT": "bankcashout", "NAP TIEN VI DIEN TU": "adjustment"}, "otherAdjust": false},
+    "MisTIDfield": "RefID"
   },
   "ocb.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Ngày", "position": 0, "pattern": "", "split": ""},
     "MomoId": {"name": "", "position": -1, "pattern": ""},
-    "RefId": {"name": "Số GD", "position": 1, "pattern": "", "split": ""},
+    "RefId": {"name": "Số GD", "position": 1, "pattern": ".*", "split": ""},
+    "AdjustmentTid": {"ruleAdjustment": false},
     "DebitAmount": {"name": "Ps giảm (Nợ)", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Ps tăng (Có)", "position": 3, "pattern": "", "split": ""},
-    "Type": {"name": "Nội dung giao dịch", "position": 5, "pattern": "CASHIN|CASHOUT|TopUp", "matcher": {"CASHIN": "CashIn", "CASHOUT": "CashOut", "TopUp": "TopUp"}}
+    "Type": {"name": "Nội dung giao dịch", "position": 5, "pattern": "MOMO CASHIN|MOMO CASHOUT|^((?!MOMO CASHIN|MOMO CASHOUT).)*$", "matcher": {"MOMO CASHIN": "bankcashin", "MOMO CASHOUT": "bankcashout", "Adjustment": "adjustment"}, "otherAdjust": true},
+    "MisTIDfield": "transID"
   },
   "bidv.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Ngày giao dịch", "position": 1, "pattern": "", "split": ""},
     "MomoId": {"name": "Nội dung", "position": 4, "pattern": "(\\d+)(?!.*\\d{10,11})", "split": ""},
     "RefId": {"name": "Nội dung", "position": 4, "pattern": "_\\d{8}_", "split": [" ", "_"]},
+    "AdjustmentTid": {"ruleAdjustment": false},
     "DebitAmount": {"name": "PS Nợ", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "PS Có", "position": 3, "pattern": "", "split": ""},
-    "Type": {"name": "Nội dung", "position": 4, "pattern": "Nap|Rut|TopUp", "matcher": {"Nap": "CashIn", "Rut": "CashOut", "TopUp": "TopUp"}, "split": ""}
+    "Type": {"name": "Nội dung", "position": 4, "pattern": "Nap|Rut|Adjustment", "matcher": {"Nap": "bankcashin", "Rut": "bankcashout", "Adjustment": "adjustment"}, "otherAdjust": false},
+    "MisTIDfield": "RefID"
   },
   "vcb.bank": {
     "FileType": "XSSF",
     "Date": {"name": "Ngày giao dịch", "position": 0, "pattern": "", "split": ""},
     "MomoId": {"name": "Mô tả", "position": 4, "pattern": "(\\b\\d{10,11}\\b)", "split": "."},
     "RefId": {"name": "Mô tả", "position": 4, "pattern": "[0-9]+", "split": "."},
+    "AdjustmentTid": {"ruleAdjustment": true, "name": "Số tham chiếu", "position": 1, "pattern": "(\\d{7}+)", "lengthRule": 7},
     "DebitAmount": {"name": "Số tiền ghi nợ", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Số tiền ghi có", "position": 3, "pattern": "", "split": ""},
-    "Type": {"name": "Mô tả", "position": 4, "pattern": "CashIn|CashOut|IBVCB", "matcher": {"CashIn": "CashIn", "CashOut": "CashOut", "IBVCB": "TopUp"}, "split": ""}
+    "Type": {"name": "Mô tả", "position": 4, "pattern": "CashIn|CashOut|IBVCB", "matcher": {"CashIn": "bankcashin", "CashOut": "bankcashout", "IBVCB": "adjustment"}, "otherAdjust": false},
+    "MisTIDfield": "RefID"
   }
 }
 

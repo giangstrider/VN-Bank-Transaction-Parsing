@@ -110,12 +110,31 @@ public class ServiceParsing {
 
                         String typeMatcher = getStringValueByPattern(typePattern, typePosition, currentRow);
                         if(!typeMatcher.equals("")){
+                            //Special rule for OCB - if not MOMO CASHIN or MOMO CASHOUT -> Adjustment
+                            boolean ruleOtherAjust = AppUtils.getBooleanFromJsonObject(serviceConfig.getAsJsonObject("Type"), "otherAdjust");
+                            if(ruleOtherAjust){
+                                if(!typeMatcher.equals("MOMO CASHIN") && !typeMatcher.equals("MOMO CASHOUT")){
+                                    typeMatcher = "Adjustment";
+                                }
+                            }
+                            // ========== End rule OCB ===============
                             typeTransaction = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Type").getAsJsonObject("matcher"), typeMatcher);
                             transaction.setType(typeTransaction);
+
+                            //Special Rule for Vietcombank IB - Adjustment
+                            boolean ruleAdjustment = AppUtils.getBooleanFromJsonObject(serviceConfig.getAsJsonObject("AdjustmentTid"), "ruleAdjustment");
+                            if(typeTransaction.equals("Adjustment") && ruleAdjustment){
+                                String transactionAdjustmentPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("AdjustmentTid"), "pattern");
+                                Integer positionTransactionAdjustment = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("AdjustmentTid"), "position");
+                                transactionId = getStringValueByPattern(transactionAdjustmentPattern, positionTransactionAdjustment, currentRow);
+                            }
+                            // ========== End rule Vietcombank ===============
                         }
+                        transaction.setTransactionId(transactionId.replaceAll("[-+.^:,_]",""));
 
                         log.info("{Transaction: {Date: "+ transaction.getDate() +", momoId: "+ transaction.getMomoId() +", transactionId: "+ transaction.getTransactionId() +", " +
-                                "debit: "+ transaction.getDebitAmount() +", credit: "+ transaction.getCreditAmount() +", type: "+ transaction.getType() +"}}");
+                        "debit: "+ transaction.getDebitAmount() +", credit: "+ transaction.getCreditAmount() +", type: "+ transaction.getType() +"}}");
+
                         saveServiceParsed(transaction);
                     }else{
                         log.info("NOT TRANSACTION: " + currentRow.getCell(positionTransaction));
@@ -200,7 +219,8 @@ public class ServiceParsing {
             Matcher m = p.matcher(currentRow.getCell(position).getStringCellValue());
 
             if(m.find()){
-                value = m.group(0).replaceAll("[-+.^:,_]","");
+                //value = m.group(0).replaceAll("[-+.^:,_]","");
+                value = m.group(0);
             }
         }else{
             value = currentRow.getCell(position).getStringCellValue();
