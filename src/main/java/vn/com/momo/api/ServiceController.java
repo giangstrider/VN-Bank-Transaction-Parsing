@@ -32,7 +32,7 @@ public class ServiceController {
         path(reportUrl, () -> {
             get("/mapping", (request, response) -> {
                 ServiceMatcher matching = new ServiceMatcher("exim.bank");
-                matching.getTransIDList();
+                matching.getDifferData();
                 return "OK";
             });
         });
