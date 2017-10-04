@@ -8,7 +8,7 @@
     "DebitAmount": {"name": "PHÁT SINH NỢ", "position": 3, "pattern": "", "split": ""},
     "CreditAmount": {"name": "PHÁT SINH CÓ", "position": 4, "pattern": "", "split": ""},
     "Type": {"name": "DIỄN GIẢI", "position": 6, "pattern": "tu -|Rut|tu.", "matcher": {"tu -": "bankcashin", "Rut": "bankcashout", "tu.": "adjustment"}, "otherAdjust": false},
-    "MisTIDfield": "RefID"
+    "MisRefID": {"name": "TRANSIDAPPMOMO", "type": "long"}
   },
   "tp.bank": {
     "FileType": "HSSF",
@@ -19,7 +19,7 @@
     "DebitAmount": {"name": "Ghi nợ\\n(Debit)", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Ghi có\\n(Credit)", "position": 3, "pattern": "", "split": ""},
     "Type": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "NAP TIEN VI MOMO|RUT|NAP TIEN VI DIEN TU", "matcher": {"NAP TIEN VI MOMO": "bankcashin", "RUT": "bankcashout", "NAP TIEN VI DIEN TU": "adjustment"}, "otherAdjust": false},
-    "MisTIDfield": "RefID"
+    "MisRefID": {"name": "REFTID", "type": "string"}
   },
   "ocb.bank": {
     "FileType": "HSSF",
@@ -30,7 +30,7 @@
     "DebitAmount": {"name": "Ps giảm (Nợ)", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Ps tăng (Có)", "position": 3, "pattern": "", "split": ""},
     "Type": {"name": "Nội dung giao dịch", "position": 5, "pattern": "MOMO CASHIN|MOMO CASHOUT|^((?!MOMO CASHIN|MOMO CASHOUT).)*$", "matcher": {"MOMO CASHIN": "bankcashin", "MOMO CASHOUT": "bankcashout", "Adjustment": "adjustment"}, "otherAdjust": true},
-    "MisTIDfield": "transID"
+    "MisRefID": {"name": "REFTID", "type": "string"}
   },
   "bidv.bank": {
     "FileType": "HSSF",
@@ -41,7 +41,7 @@
     "DebitAmount": {"name": "PS Nợ", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "PS Có", "position": 3, "pattern": "", "split": ""},
     "Type": {"name": "Nội dung", "position": 4, "pattern": "Nap|Rut|Adjustment", "matcher": {"Nap": "bankcashin", "Rut": "bankcashout", "Adjustment": "adjustment"}, "otherAdjust": false},
-    "MisTIDfield": "RefID"
+    "MisRefID": {"name": "REFTID", "type": "string"}
   },
   "vcb.bank": {
     "FileType": "XSSF",
@@ -52,7 +52,7 @@
     "DebitAmount": {"name": "Số tiền ghi nợ", "position": 2, "pattern": "", "split": ""},
     "CreditAmount": {"name": "Số tiền ghi có", "position": 3, "pattern": "", "split": ""},
     "Type": {"name": "Mô tả", "position": 4, "pattern": "CashIn|CashOut|IBVCB", "matcher": {"CashIn": "bankcashin", "CashOut": "bankcashout", "IBVCB": "adjustment"}, "otherAdjust": false},
-    "MisTIDfield": "RefID"
+    "MisRefID": {"name": "REFTID", "type": "string"}
   }
 }
 
