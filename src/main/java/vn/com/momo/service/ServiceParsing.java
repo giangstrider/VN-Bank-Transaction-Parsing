@@ -139,8 +139,6 @@ public class ServiceParsing {
                     }else{
                         log.info("NOT TRANSACTION: " + currentRow.getCell(positionTransaction));
                     }
-
-
                 }catch(IllegalStateException e){
                     e.printStackTrace();
                     log.info(currentRow.getCell(positionTransaction));
