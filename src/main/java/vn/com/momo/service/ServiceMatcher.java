@@ -27,9 +27,13 @@ public class ServiceMatcher {
     @Getter @Setter String serviceCode;
     Connection conn = DataBaseCP.getInstance().getConnection();
     JsonObject serviceConfig;
+    String fromDate;
+    String toDate;
 
-    public ServiceMatcher(String serviceCode){
+    public ServiceMatcher(String serviceCode, String fromDate, String toDate){
         this.serviceCode = serviceCode;
+        this.fromDate = fromDate;
+        this.toDate = toDate;
 
         JsonObject configJson = null;
         try {
@@ -89,17 +93,16 @@ public class ServiceMatcher {
 
 
     public ArrayList getDifferData(){
-        ArrayList misData = excludedCompareMis();
-        misData.addAll(excludedCompareService());
-        Iterator<String> iterator = misData.iterator();
-        while (iterator.hasNext()) {
-            log.info(iterator);
+        ArrayList<HashMap> misData = excludedData();
+//        log.info(misData.size());
+
+        for(HashMap transaction : misData){
+            log.info("{Transaction: {TID: "+ transaction.get("REF_TID") +", AMOUNT: "+ transaction.get("AMOUNT") +", TRANS_TYPE: "+ transaction.get("TRANS_TYPE") +"}}");
         }
         return misData;
     }
 
     private ArrayList excludedCompareMis(){
-        ArrayList excludedCompareData = new ArrayList();
         ArrayList misData = getMisData();
         ArrayList serviceData = getServiceData();
 
@@ -108,7 +111,6 @@ public class ServiceMatcher {
     }
 
     private ArrayList excludedCompareService(){
-        ArrayList excludedCompareData = new ArrayList();
         ArrayList misData = getMisData();
         ArrayList serviceData = getServiceData();
 
@@ -116,7 +118,22 @@ public class ServiceMatcher {
         return serviceData;
     }
 
-    private ArrayList<HashMap> getMisData() {
+    private ArrayList excludedData(){
+        ArrayList misData = getMisData();
+        log.info("data: " + misData.size());
+        ArrayList serviceData = getServiceData();
+        log.info("service: " + serviceData.size());
+        //
+        misData.removeAll(getServiceData());
+        log.info("dataafter: " + misData.size());
+        serviceData.removeAll(getMisData());
+        log.info("serviceafter: " + serviceData.size());
+        misData.addAll(serviceData);
+        log.info("LAST: " + misData.size());
+        return misData;
+    }
+
+    private ArrayList getMisData() {
         ArrayList misData = new ArrayList();
 
         try {
@@ -129,16 +146,18 @@ public class ServiceMatcher {
 
             ResultSet resultSet = (ResultSet) cs.getObject(4);
             String fieldRefID = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("MisRefID"), "name");
-            String typeRefID = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("MisRefID"), "type");
 
             while (resultSet.next()){
-                HashMap transactionData = new HashMap();
-                transactionData.put("REF_TID", resultSet.getString(fieldRefID));
-                transactionData.put("AMOUNT", resultSet.getDouble("AMOUNT"));
-                transactionData.put("TRANS_TYPE", resultSet.getString("TRANSTYPE"));
-                misData.add(transactionData);
+                int statusTrans = resultSet.getInt("STATE");
+                if(statusTrans != 6){
+                    HashMap transactionData = new HashMap();
+                    transactionData.put("REF_TID", resultSet.getString(fieldRefID));
+                    transactionData.put("AMOUNT", resultSet.getDouble("AMOUNT"));
+                    transactionData.put("TRANS_TYPE", resultSet.getString("TRANSTYPE"));
+                    misData.add(transactionData);
+                }
             }
-            conn.close();
+
         } catch (Exception e){
             e.getStackTrace();
         }
@@ -146,24 +165,33 @@ public class ServiceMatcher {
         return misData;
     }
 
-    private ArrayList<HashMap> getServiceData() {
+    private ArrayList getServiceData() {
         ArrayList serviceData = new ArrayList();
         try{
-            String sql = "SELECT * FROM trans_partners WHERE PARTNER_ID = '" + serviceCode +"'";
+            String sql = "SELECT * FROM TRANS_PARTNERS WHERE PARTNER_ID = '" + serviceCode +"'";
+            log.info(sql);
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
+            int count = 0;
             while (resultSet.next()) {
                 double amount = resultSet.getDouble("CREDIT_AMOUNT");
                 if(amount == 0){
                     amount = resultSet.getDouble("DEBIT_AMOUNT");
                 }
 
+                if(amount == 0){
+                    log.info(resultSet.getString("REF_TID") + " - " + amount + " - " + resultSet.getString("TRANS_TYPE"));
+                }
+
                 HashMap transactionData = new HashMap();
                 transactionData.put("REF_TID", resultSet.getString("REF_TID"));
                 transactionData.put("AMOUNT", amount);
-                transactionData.put("TRANS_TYPE", resultSet.getString("TRANSTYPE"));
+                transactionData.put("TRANS_TYPE", resultSet.getString("TRANS_TYPE"));
                 serviceData.add(transactionData);
+                count++;
             }
+
+            log.info("===" + count);
         }catch (Exception e){
             e.getStackTrace();
         }

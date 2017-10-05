@@ -31,7 +31,7 @@ public class ServiceController {
         });
         path(reportUrl, () -> {
             get("/mapping", (request, response) -> {
-                ServiceMatcher matching = new ServiceMatcher("exim.bank");
+                ServiceMatcher matching = new ServiceMatcher("bidv.bank");
                 matching.getDifferData();
                 return "OK";
             });
