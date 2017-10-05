@@ -2,6 +2,7 @@
   "exim.bank": {
     "FileType": "HSSF",
     "Date": {"name": "NGÀY GIỜ GIAO DỊCH", "position": 2, "pattern": "", "split": ""},
+    "ruleDateSpecify": {"rule": false},
     "MomoId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "\\d{10,11}", "split": "-"},
     "RefId": {"name": "DIỄN GIẢI", "position": 6, "pattern": "-\\d{12,15}", "split": "-"},
     "AdjustmentTid": {"ruleAdjustment": false},
@@ -13,6 +14,7 @@
   "tp.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Thời gian\\n(Date)", "position": 0, "pattern": "", "split": ""},
+    "ruleDateSpecify": {"rule": false},
     "MomoId": {"name": "Diễn giải\\n(Contents)", "position": 1, "pattern": "\\d{10,11}", "split": "-"},
     "RefId": {"name": "Mã giao dịch\\n(Transaction code)", "position": 7, "pattern": "", "split": ""},
     "AdjustmentTid": {"ruleAdjustment": false},
@@ -24,6 +26,7 @@
   "ocb.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Ngày", "position": 0, "pattern": "", "split": ""},
+    "ruleDateSpecify": {"rule": false},
     "MomoId": {"name": "", "position": -1, "pattern": ""},
     "RefId": {"name": "Số GD", "position": 1, "pattern": ".*", "split": ""},
     "AdjustmentTid": {"ruleAdjustment": false},
@@ -35,6 +38,7 @@
   "bidv.bank": {
     "FileType": "HSSF",
     "Date": {"name": "Ngày giao dịch", "position": 1, "pattern": "", "split": ""},
+    "ruleDateSpecify": {"rule": true, "position": 4, "pattern": "\\b(\\d{4}-\\d{2}-\\d{2})"},
     "MomoId": {"name": "Nội dung", "position": 4, "pattern": "(\\d+)(?!.*\\d{10,11})", "split": ""},
     "RefId": {"name": "Nội dung", "position": 4, "pattern": "_\\d{8}_", "split": [" ", "_"]},
     "AdjustmentTid": {"ruleAdjustment": false},

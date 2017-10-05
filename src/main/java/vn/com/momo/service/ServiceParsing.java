@@ -64,6 +64,7 @@ public class ServiceParsing {
 
             String datePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("Date"), "pattern");
             Integer positionDate = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("Date"), "position");
+            Boolean specialDateRule = AppUtils.getBooleanFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "rule");
 
             String momoPattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("MomoId"), "pattern");
             Integer positionMomo = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("MomoId"), "position");
@@ -89,6 +90,23 @@ public class ServiceParsing {
                     if(matcherDate.find()){
                         Transaction transaction = new Transaction();
                         transaction.setServiceName(serviceCode);
+
+                        //Special Rule for BIDV - get Date from Description or Date column
+                        if(specialDateRule){
+                            log.info("Specirule Date");
+                            String specialDateRulePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "pattern");
+                            Integer positionSpecialDateRule = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "position");
+                            String rawDateSpecialRule = getStringValueByPattern(specialDateRulePattern, positionSpecialDateRule, currentRow);
+                            log.info("rawDateSpecialRule: " + rawDateSpecialRule);
+                            if(rawDateSpecialRule != null && !rawDateSpecialRule.isEmpty()){
+                                String specialYear = rawDateSpecialRule.substring(0, 4);
+                                String specialDay = rawDateSpecialRule.substring(8, 10);
+                                String specialMonth = rawDateSpecialRule.substring(5, 7);
+                                date = specialDay + "/" + specialMonth + "/" + specialYear;
+                                log.info("date lastl; " + date);
+                            }
+                        }
+                        // ========== End rule BIDV ===============
                         transaction.setDate(date);
 
                         if(positionMomo > 0){
