@@ -93,17 +93,14 @@ public class ServiceParsing {
 
                         //Special Rule for BIDV - get Date from Description or Date column
                         if(specialDateRule){
-                            log.info("Specirule Date");
                             String specialDateRulePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "pattern");
                             Integer positionSpecialDateRule = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "position");
                             String rawDateSpecialRule = getStringValueByPattern(specialDateRulePattern, positionSpecialDateRule, currentRow);
-                            log.info("rawDateSpecialRule: " + rawDateSpecialRule);
                             if(rawDateSpecialRule != null && !rawDateSpecialRule.isEmpty()){
                                 String specialYear = rawDateSpecialRule.substring(0, 4);
                                 String specialDay = rawDateSpecialRule.substring(8, 10);
                                 String specialMonth = rawDateSpecialRule.substring(5, 7);
                                 date = specialDay + "/" + specialMonth + "/" + specialYear;
-                                log.info("date lastl; " + date);
                             }
                         }
                         // ========== End rule BIDV ===============
