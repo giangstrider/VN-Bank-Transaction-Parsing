@@ -91,16 +91,22 @@ public class ServiceParsing {
                         Transaction transaction = new Transaction();
                         transaction.setServiceName(serviceCode);
 
-                        //Special Rule for BIDV - get Date from Description or Date column
+                        //Special Rule for BIDV - Exim - get Date from Description or Date column
                         if(specialDateRule){
                             String specialDateRulePattern = AppUtils.getStringFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "pattern");
                             Integer positionSpecialDateRule = AppUtils.getIntFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "position");
                             String rawDateSpecialRule = getStringValueByPattern(specialDateRulePattern, positionSpecialDateRule, currentRow);
                             if(rawDateSpecialRule != null && !rawDateSpecialRule.isEmpty()){
-                                String specialYear = rawDateSpecialRule.substring(0, 4);
-                                String specialDay = rawDateSpecialRule.substring(8, 10);
-                                String specialMonth = rawDateSpecialRule.substring(5, 7);
-                                date = specialDay + "/" + specialMonth + "/" + specialYear;
+                                boolean checkSplitDate = AppUtils.getBooleanFromJsonObject(serviceConfig.getAsJsonObject("ruleDateSpecify"), "splitDate");
+                                if(checkSplitDate){
+                                    String specialYear = rawDateSpecialRule.substring(0, 4);
+                                    String specialDay = rawDateSpecialRule.substring(8, 10);
+                                    String specialMonth = rawDateSpecialRule.substring(5, 7);
+
+                                    date = specialDay + "/" + specialMonth + "/" + specialYear;
+                                }else{
+                                    date = rawDateSpecialRule;
+                                }
                             }
                         }
                         // ========== End rule BIDV ===============

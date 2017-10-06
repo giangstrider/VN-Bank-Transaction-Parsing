@@ -56,15 +56,16 @@ public class ServiceMatcher {
         ArrayList<HashMap> misData = excludedData();
 
         for(HashMap transaction : misData) {
+            if(transaction.get("REF_TID") != null && !transaction.get("TRANS_TYPE").toString().equals("adjustment")){
+                if (!checkAnsweredData(transaction.get("REF_TID").toString())) {
+                    //String tid = JedisClient.getInstance().hget(transaction.get("REF_TID").toString(), "momo_tid");
+                    //transaction.put("MOMO_TID", tid);
+                    insertTransPartnersDiff(transaction);
+                    log.info("{Transaction: {REF_ID: " + transaction.get("REF_TID") + ", AMOUNT: " + transaction.get("AMOUNT") + ", TRANS_TYPE: " + transaction.get("TRANS_TYPE") +
+                            ", TID: " + transaction.get("MOMO_TID") + ", MOMO_ID: "+ transaction.get("MOMO_ID") + "}}");
 
-            //if (!checkAnsweredData(transaction.get("REF_TID").toString())) {
-                //String tid = JedisClient.getInstance().hget(transaction.get("REF_TID").toString(), "momo_tid");
-                //transaction.put("MOMO_TID", tid);
-//                insertTransPartnersDiff(transaction);
-//                log.info("{Transaction: {TID: " + transaction.get("REF_TID") + ", AMOUNT: " + transaction.get("AMOUNT") + ", TRANS_TYPE: " + transaction.get("TRANS_TYPE") +
-//                        ", TID: " + transaction.get("MOMO_TID") + ", MOMO_ID: "+ transaction.get("MOMO_ID") + "}}");
-
-            //}
+                }
+            }
         }
 //                    }
 //        log.info(misData.size());
@@ -91,8 +92,8 @@ public class ServiceMatcher {
         try {
             cs = conn.prepareCall("{call PRO_DOISOAT_NGANHANG_DAILY(?,?,?,?)}");
             cs.setString(1, serviceCode);
-            cs.setString(2, "02-10-2017 00:00:00");
-            cs.setString(3, "02-10-2017 23:59:59");
+            cs.setString(2, fromDate);
+            cs.setString(3, toDate);
             cs.registerOutParameter(4, OracleTypes.CURSOR);
             cs.execute();
 
@@ -149,7 +150,6 @@ public class ServiceMatcher {
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
-            int count = 0;
             while (resultSet.next()) {
                 double amount = resultSet.getDouble("CREDIT_AMOUNT");
                 if(amount == 0){
@@ -166,10 +166,7 @@ public class ServiceMatcher {
                 transactionData.put("TRANS_TYPE", resultSet.getString("TRANS_TYPE"));
                 transactionData.put("MOMO_ID", resultSet.getString("MOMO_ID"));
                 serviceData.add(transactionData);
-                count++;
             }
-            log.info("vllllllll");
-            log.info("count" + count);
 
         }catch (Exception e){
             e.getStackTrace();
@@ -179,9 +176,12 @@ public class ServiceMatcher {
     }
 
     private boolean checkAnsweredData(String ref_tid){
+        log.info("ref " + ref_tid);
+        if(ref_tid == null){
+            return false;
+        }
         try{
             String sql = "SELECT * FROM TRANS_PARTNERS_DIFF WHERE REF_TID = " + ref_tid;
-            log.info(sql);
             Connection conn = DataBaseCP.getInstance().getConnection();
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);

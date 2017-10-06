@@ -31,7 +31,10 @@ public class ServiceController {
         });
         path(reportUrl, () -> {
             get("/mapping", (request, response) -> {
-                ServiceMatcher matching = new ServiceMatcher("exim.bank", "02-10-2017 00:00:00", "03-10-2017 00:00:00");
+                String paramName = request.queryParams("name");
+                String paramFrom = request.queryParams("from");
+                String paramTo = request.queryParams("to");
+                ServiceMatcher matching = new ServiceMatcher(paramName, paramFrom, paramTo);
                 matching.getDifferData();
                 return "OK";
             });
