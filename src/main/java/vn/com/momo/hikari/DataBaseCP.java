@@ -53,7 +53,7 @@ public class DataBaseCP {
             connection = hds.getConnection();
             statement = connection.createStatement();
             statement.executeUpdate(sql);
-
+            connection.close();
         } catch (Exception e) {
             if (connection != null) {
                 try {

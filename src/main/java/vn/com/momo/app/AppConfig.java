@@ -16,6 +16,8 @@ public class AppConfig {
     @Getter
     Properties oracleClient;
     @Getter
+    Properties jedisClient;
+    @Getter
     Properties fileConfig;
 
     //private Configurations configs;
@@ -27,6 +29,7 @@ public class AppConfig {
             server = getPropertiesPath("server.properties");
             oracleClient = new PropertiesReader("oraclejdbc.properties").getProperties();
             fileConfig = new PropertiesReader("fileconfig.properties").getProperties();
+            jedisClient = new PropertiesReader("jedis-client.properties").getProperties();
         } catch (Exception e) {
             log.error(AppUtils.getFullStackTrace(e));
         }

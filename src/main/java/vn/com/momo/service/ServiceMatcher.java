@@ -10,6 +10,7 @@ import vn.com.momo.app.AppConfig;
 import vn.com.momo.app.AppUtils;
 import vn.com.momo.gson.JsonParserInstance;
 import vn.com.momo.hikari.DataBaseCP;
+import vn.com.momo.jedis.JedisClient;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -26,12 +27,11 @@ import java.util.*;
 @Log4j2
 public class ServiceMatcher {
     @Getter @Setter String serviceCode;
-    Connection conn = DataBaseCP.getInstance().getConnection();
+    //Connection conn = DataBaseCP.getInstance().getConnection();
     JsonObject serviceConfig;
     String requestDate;
     String fromDate;
     String toDate;
-    HashMap PartnerRefDiction;
 
     public ServiceMatcher(String serviceCode, String fromDate, String toDate){
         this.serviceCode = serviceCode;
@@ -55,12 +55,18 @@ public class ServiceMatcher {
     public ArrayList getDifferData(){
         ArrayList<HashMap> misData = excludedData();
 
-        for(HashMap transaction : misData){
-            if(!checkAnsweredData(transaction.get("REF_TID").toString())){
-                insertTransPartnersDiff(transaction);
-            }
-            log.info("{Transaction: {TID: "+ transaction.get("REF_TID") +", AMOUNT: "+ transaction.get("AMOUNT") +", TRANS_TYPE: "+ transaction.get("TRANS_TYPE") +"}}");
+        for(HashMap transaction : misData) {
+
+            //if (!checkAnsweredData(transaction.get("REF_TID").toString())) {
+                //String tid = JedisClient.getInstance().hget(transaction.get("REF_TID").toString(), "momo_tid");
+                //transaction.put("MOMO_TID", tid);
+//                insertTransPartnersDiff(transaction);
+//                log.info("{Transaction: {TID: " + transaction.get("REF_TID") + ", AMOUNT: " + transaction.get("AMOUNT") + ", TRANS_TYPE: " + transaction.get("TRANS_TYPE") +
+//                        ", TID: " + transaction.get("MOMO_TID") + ", MOMO_ID: "+ transaction.get("MOMO_ID") + "}}");
+
+            //}
         }
+//                    }
 //        log.info(misData.size());
         return misData;
     }
@@ -71,9 +77,7 @@ public class ServiceMatcher {
         ArrayList serviceData = getServiceData();
         log.info("service: " + serviceData.size());
         misData.removeAll(getServiceData());
-        log.info("dataafter: " + misData.size());
         serviceData.removeAll(getMisData());
-        log.info("serviceafter: " + serviceData.size());
         misData.addAll(serviceData);
         log.info("LAST: " + misData.size());
         return misData;
@@ -82,11 +86,13 @@ public class ServiceMatcher {
     private ArrayList getMisData() {
         ArrayList misData = new ArrayList();
 
+        Connection conn = DataBaseCP.getInstance().getConnection();
+        CallableStatement cs = null;
         try {
-            CallableStatement cs = conn.prepareCall("{call PRO_DOISOAT_NGANHANG_DAILY(?,?,?,?)}");
+            cs = conn.prepareCall("{call PRO_DOISOAT_NGANHANG_DAILY(?,?,?,?)}");
             cs.setString(1, serviceCode);
-            cs.setString(2, "15-09-2017 00:00:00");
-            cs.setString(3, "15-09-2017 23:59:59");
+            cs.setString(2, "02-10-2017 00:00:00");
+            cs.setString(3, "02-10-2017 23:59:59");
             cs.registerOutParameter(4, OracleTypes.CURSOR);
             cs.execute();
 
@@ -100,12 +106,32 @@ public class ServiceMatcher {
                     transactionData.put("REF_TID", resultSet.getString(fieldRefID));
                     transactionData.put("AMOUNT", resultSet.getDouble("AMOUNT"));
                     transactionData.put("TRANS_TYPE", resultSet.getString("TRANSTYPE"));
+
+
+                    String phone = null;
+                    if(resultSet.getString("TRANSTYPE").equals("bankcashout")){
+                        phone = resultSet.getString("DEBITOR");
+                    }else{
+                        phone = resultSet.getString("CREDITOR");
+                    }
+
+                    transactionData.put("MOMO_ID", phone.substring(1));
                     misData.add(transactionData);
+
+                    //JedisClient.getInstance().hset(resultSet.getString(fieldRefID), "momo_tid", resultSet.getString("TID"), 7200);
                 }
             }
 
+
         } catch (Exception e){
             e.getStackTrace();
+        } finally {
+            try {
+                //conn.close();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+
         }
 
         return misData;
@@ -119,6 +145,7 @@ public class ServiceMatcher {
             String sql = "SELECT * FROM TRANS_PARTNERS WHERE PARTNER_ID = '" + serviceCode +"' AND TRANS_DATE = TO_DATE('" + onlyDateParsing + "','dd-MM-yyyy')";
             //String sql = "SELECT COUNT(*) FROM TRANS_PARTNERS WHERE PARTNER_ID = '" + serviceCode +"' AND TRANS_DATE = TO_DATE('" + onlyDateParsing + "','dd-MM-yyyy')";
             log.info(sql);
+            Connection conn = DataBaseCP.getInstance().getConnection();
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
@@ -137,12 +164,13 @@ public class ServiceMatcher {
                 transactionData.put("REF_TID", resultSet.getString("REF_TID"));
                 transactionData.put("AMOUNT", amount);
                 transactionData.put("TRANS_TYPE", resultSet.getString("TRANS_TYPE"));
+                transactionData.put("MOMO_ID", resultSet.getString("MOMO_ID"));
                 serviceData.add(transactionData);
-
                 count++;
             }
+            log.info("vllllllll");
+            log.info("count" + count);
 
-            log.info("===" + count);
         }catch (Exception e){
             e.getStackTrace();
         }
@@ -154,6 +182,7 @@ public class ServiceMatcher {
         try{
             String sql = "SELECT * FROM TRANS_PARTNERS_DIFF WHERE REF_TID = " + ref_tid;
             log.info(sql);
+            Connection conn = DataBaseCP.getInstance().getConnection();
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
@@ -162,8 +191,9 @@ public class ServiceMatcher {
                 count++;
             }
 
-            log.info("Count: " + count);
+
             if(count > 0){
+                log.info("Have record " + ref_tid);
                 return true;
             }
         }catch (Exception e){
@@ -176,8 +206,7 @@ public class ServiceMatcher {
     private void insertTransPartnersDiff(HashMap transaction){
         String sql = "INSERT INTO TRANS_PARTNERS_DIFF(PARTNER_ID,REF_TID,TID,TRANS_DATE,AMOUNT,TRANS_TYPE, MOMO_ID) " +
                 "VALUES('" + serviceCode + "', '" + transaction.get("REF_TID") + "', " + transaction.get("TID") + ", to_date('" + requestDate + "', 'dd/MM/yyyy'), " +
-                "" + transaction.get("AMOUNT") + ", " + transaction.get("TRANS_TYPE") + ", '" + "momo_id" + "')";
-        //log.info(sql);
+                "" + transaction.get("AMOUNT") + ", '" + transaction.get("TRANS_TYPE") + "', '" + transaction.get("MOMO_ID") + "')";
         DataBaseCP.getInstance().insert(sql);
     }
 }
