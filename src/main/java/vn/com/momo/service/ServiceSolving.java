@@ -1,5 +1,7 @@
 package vn.com.momo.service;
 
-public class ServiceParsing {
-
+public class ServiceSolving {
+	public ServiceSolving(int file, int number){
+		String filename = "DataVNParsing";
+	}
 }
